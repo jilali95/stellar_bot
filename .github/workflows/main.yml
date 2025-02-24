@@ -1,0 +1,27 @@
+name: Run Telegram Bot Script
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"  # Runs every 30 minutes
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest  # Best for free-tier minutes
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install python-telegram-bot pandas
+
+      - name: Run Script
+        run: python your_script.py
