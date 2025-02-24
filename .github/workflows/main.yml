@@ -24,4 +24,4 @@ jobs:
           pip install python-telegram-bot pandas
 
       - name: Run Script
-        run: python your_script.py
+        run: python tb.py
