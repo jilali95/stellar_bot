@@ -47,7 +47,7 @@ async def handle_text(update: Update, context: CallbackContext):
         await update.message.reply_text("You are not authorized to use this bot.")
 
 def main():
-    application = Application.builder().token('8185227134:AAFbaDCXAva9AYo2EK0HBaw_hyZeW6MFS3k').build()
+    application = Application.builder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(CommandHandler('h', h))
     application.run_polling()
