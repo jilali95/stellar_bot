@@ -21,7 +21,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install python-telegram-bot pandas requests
+          pip install python-telegram-bot pandas requests gdown
 
       - name: Run Script
         run: python tb.py
