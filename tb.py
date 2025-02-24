@@ -2,22 +2,21 @@ import os
 import time
 import pandas as pd
 import requests
+import gdown
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
-echo "$CSV_URL"
+
+# ✅ Print environment variables for debugging
+print(f"CSV_URL: {os.getenv('CSV_URL')}")
+print(f"USERS_S: {os.getenv('USERS_S')}")
 
 # ✅ Read allowed users from GitHub Secret
 users_s = os.getenv("USERS_S", "").strip()
 ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
-echo "$USERS_S"
-import os
-import time
-import pandas as pd
-import requests
-import gdown  # Ensure gdown is installed
 
 # ✅ Get the CSV URL from environment variables
 google_drive_link = os.getenv("CSV_URL")
+df = None  # Initialize df to avoid reference errors
 
 if google_drive_link:
     try:
@@ -33,14 +32,22 @@ if google_drive_link:
 
         # ✅ Download the CSV content using gdown
         output_path = "temp_stock_data.csv"
-        gdown.download(download_url, output_path, quiet=False)
+        gdown.download(download_url, output_path, quiet=False, use_cookies=False)
 
         # ✅ Load the CSV into a DataFrame
         df = pd.read_csv(output_path)
         print("✅ CSV loaded successfully!")
 
+        # ✅ Check for required columns
+        required_columns = {'ARTICLE', 'DERNIER_PRIX_ACHAT', 'pharmacien', 'QTE'}
+        if not required_columns.issubset(df.columns):
+            print("⚠️ Error: Missing expected columns in CSV!")
+            df = None  # Reset df if columns are missing
+
     except Exception as e:
         print(f"⚠️ Error reading CSV: {e}")
+        df = None  # Reset df on error
+
 else:
     print("⚠️ Error: CSV_URL environment variable is missing!")
 
@@ -72,19 +79,25 @@ async def handle_text(update: Update, context: CallbackContext):
         matches = []
 
         for _, row in df.iterrows():
-            if all(word in str(row['ARTICLE']).lower() for word in search_term.split()):
-                benif = ((row['pharmacien'] - row['DERNIER_PRIX_ACHAT']) / row['DERNIER_PRIX_ACHAT']) * 100
-                matches.append(f"{row['ARTICLE']},\ngrossiste: {row['DERNIER_PRIX_ACHAT']:.2f} DA,\n"
-                               f"Pharmacien: {row['pharmacien']:.2f} DA,\nbenif: {benif:.0f} %\nQNT: {row['QTE']}")
+            if all(word in str(row.get('ARTICLE', '')).lower() for word in search_term.split()):
+                try:
+                    benif = ((row['pharmacien'] - row['DERNIER_PRIX_ACHAT']) / row['DERNIER_PRIX_ACHAT']) * 100
+                    matches.append(
+                        f"{row['ARTICLE']},\nGrossiste: {row['DERNIER_PRIX_ACHAT']:.2f} DA,\n"
+                        f"Pharmacien: {row['pharmacien']:.2f} DA,\nBénéfice: {benif:.0f} %\nQNT: {row['QTE']}"
+                    )
+                except KeyError:
+                    print(f"⚠️ Missing expected data in row: {row}")
+                    continue
 
         if matches:
             await update.message.reply_text(f"\n________________________________\n".join(matches))
             num_articles = len(matches)
-            await update.message.reply_text(f"\nNumber of articles: {num_articles}\nLast Update: {last_modification}")
+            await update.message.reply_text(f"\nNombre d'articles: {num_articles}\nDernière mise à jour: {last_modification}")
         else:
-            await update.message.reply_text("No exact matches found. Please refine your search.")
+            await update.message.reply_text("Aucune correspondance trouvée. Essayez d'affiner votre recherche.")
     else:
-        await update.message.reply_text("You are not authorized to use this bot.")
+        await update.message.reply_text("❌ Vous n'êtes pas autorisé à utiliser ce bot.")
 
 # ✅ Main function to start the bot
 def main():
