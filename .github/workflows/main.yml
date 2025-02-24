@@ -38,6 +38,7 @@ jobs:
       - name: Run Telegram Bot
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CSV_DATA: ${{ secrets.CSV_DATA }}
         run: python tb.py
 
       - name: Restart Workflow (Looping)
