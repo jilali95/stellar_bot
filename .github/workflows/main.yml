@@ -21,8 +21,8 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install python-telegram-bot pandas
-
+          pip install python-telegram-bot pandas gdown
+          
       - name: Run Script
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}  # ✅ Secure way to use it
