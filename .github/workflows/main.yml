@@ -28,10 +28,5 @@ jobs:
           pip install --upgrade pip
           pip install python-telegram-bot pandas gdown
 
-      - name: Debug CSV_URL
-        run: |
-          echo "CSV_URL is: $CSV_URL"
-          [[ -z "$CSV_URL" ]] && echo "⚠️ CSV_URL is empty!"
-
       - name: Run Python script
         run: python tb.py
