@@ -11,16 +11,15 @@ if users_s:
     ALLOWED_USERS = [int(x) for x in users_s.split(',')]
 else:
     ALLOWED_USERS = []
-google_drive_link = os.environ.get("CSV_DATA", "").strip()
+# Get the Google Drive link from GitHub Secrets
+google_drive_link = os.getenv("CSV_DATA", "").strip()
 
 if google_drive_link:
-    # Extract the File ID from the link
     try:
-        file_id = google_drive_link.split("/d/")[1].split("/")[0]  # Extract file ID
         output = "stock.csv"  # Name of the downloaded file
 
-        # Download the file using gdown
-        gdown.download(f"https://drive.google.com/uc?id={file_id}", output, quiet=False)
+        # Download the file using gdown with the full link
+        gdown.download(google_drive_link, output, quiet=False)
 
         # Read the CSV file
         df = pd.read_csv(output)
@@ -28,6 +27,9 @@ if google_drive_link:
 
     except Exception as e:
         print(f"⚠️ Error downloading CSV: {e}")
+
+else:
+    print("⚠️ Error: CSV_DATA secret not found or empty!")
 
 else:
     print("⚠️ Error: csv_data secret not found!")
