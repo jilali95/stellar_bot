@@ -1,13 +1,8 @@
-name: Run Telegram Bot Script
-
-on:
-  schedule:
-    - cron: "*/5 * * * *"  # Runs every 5 minutes
-  workflow_dispatch:  # Allows manual trigger
-
 jobs:
   run-script:
     runs-on: ubuntu-latest
+    env:
+      CSV_URL: ${{ secrets.CSV_DATA }}  # ✅ Pass the secret as an environment variable
 
     steps:
       - name: Checkout repository
@@ -18,32 +13,11 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install Dependencies
-        run: |
-          pip install --upgrade pip
-          pip install python-telegram-bot pandas gdown
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: Download CSV from Secret
-        env:
-          CSV_URL: ${{ secrets.STOCK_CSV }}
-        run: |
-          if [ -n "$CSV_URL" ]; then
-            pip install gdown
-            FILE_ID=$(echo "$CSV_URL" | grep -o 'd/[^/]*' | cut -d'/' -f2)
-            gdown "https://drive.google.com/uc?id=$FILE_ID" -O stock.csv
-          else
-            echo "⚠️ CSV URL is missing!"
-          fi
+      - name: Debug CSV_URL
+        run: echo "CSV_URL is $CSV_URL"  # ✅ Check if CSV_URL is set
 
-      - name: Run Telegram Bot
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          CSV_DATA: ${{ secrets.CSV_DATA }}
+      - name: Run Python script
         run: python tb.py
-
-      - name: Restart Workflow (Looping)
-        if: always()  # Always restart, even if the script fails
-        run: |
-          gh workflow run "Run Telegram Bot Script" -R ${{ github.repository }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
