@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-script:
-    runs-on: ubuntu-latest  # Best for free-tier minutes
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -24,4 +24,6 @@ jobs:
           pip install python-telegram-bot pandas
 
       - name: Run Script
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}  # ✅ Secure way to use it
         run: python your_script.py
