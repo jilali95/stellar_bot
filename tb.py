@@ -4,11 +4,12 @@ import pandas as pd
 import requests
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
+echo "$CSV_URL"
 
 # ✅ Read allowed users from GitHub Secret
 users_s = os.getenv("USERS_S", "").strip()
 ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
-
+echo "$USERS_S"
 import os
 import time
 import pandas as pd
