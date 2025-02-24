@@ -1,3 +1,14 @@
+name: Run Python Script
+
+on:
+  push:
+    branches:
+      - main  # ✅ Runs when you push to the "main" branch
+  pull_request:
+    branches:
+      - main  # ✅ Runs on pull requests to "main"
+  workflow_dispatch:  # ✅ Allows you to run it manually from GitHub Actions
+
 jobs:
   run-script:
     runs-on: ubuntu-latest
