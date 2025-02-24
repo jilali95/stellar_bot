@@ -23,15 +23,26 @@ jobs:
           pip install --upgrade pip
           pip install python-telegram-bot pandas gdown
 
-      - name: Run Script
+      - name: Download CSV from Secret
+        env:
+          CSV_URL: ${{ secrets.STOCK_CSV }}
+        run: |
+          if [ -n "$CSV_URL" ]; then
+            pip install gdown
+            FILE_ID=$(echo "$CSV_URL" | grep -o 'd/[^/]*' | cut -d'/' -f2)
+            gdown "https://drive.google.com/uc?id=$FILE_ID" -O stock.csv
+          else
+            echo "⚠️ CSV URL is missing!"
+          fi
+
+      - name: Run Telegram Bot
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          STOCK_CSV: ${{ secrets.STOCK_CSV }}
         run: python tb.py
 
-      - name: Restart Workflow
+      - name: Restart Workflow (Looping)
         if: always()  # Always restart, even if the script fails
         run: |
-          gh workflow run main.yml -R ${{ github.repository }}
+          gh workflow run "Run Telegram Bot Script" -R ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
