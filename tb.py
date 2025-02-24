@@ -4,9 +4,13 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 import pandas as pd
 
-with open('users.txt') as f:
-    ALLOWED_USERS = [int(x) for x in f.read().split(',')]
+users_s = os.getenv("USERS_S")  # Read from environment variables
 
+# Convert it into a list of integers
+if users_s:
+    ALLOWED_USERS = [int(x) for x in users_s.split(',')]
+else:
+    ALLOWED_USERS = []
 google_drive_link = os.getenv("csv_data")
 
 if google_drive_link:
