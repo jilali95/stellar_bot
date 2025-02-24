@@ -7,7 +7,26 @@ import pandas as pd
 with open('users.txt') as f:
     ALLOWED_USERS = [int(x) for x in f.read().split(',')]
 
-df = pd.read_csv('stock.csv', delimiter=';', encoding='ISO-8859-1')
+google_drive_link = os.getenv("csv_data")
+
+if google_drive_link:
+    # Extract the File ID from the link
+    try:
+        file_id = google_drive_link.split("/d/")[1].split("/")[0]  # Extract file ID
+        output = "stock.csv"  # Name of the downloaded file
+
+        # Download the file using gdown
+        gdown.download(f"https://drive.google.com/uc?id={file_id}", output, quiet=False)
+
+        # Read the CSV file
+        df = pd.read_csv(output)
+        print(df.head())  # Debugging (remove later)
+
+    except Exception as e:
+        print(f"⚠️ Error downloading CSV: {e}")
+
+else:
+    print("⚠️ Error: csv_data secret not found!")
 last_modification = pd.Timestamp(pd.to_datetime(time.ctime(os.path.getmtime('stock.csv')))).strftime('%d.%m.%y')
 async def h(update: Update, context: CallbackContext):
     bot = context.bot
