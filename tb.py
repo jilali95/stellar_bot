@@ -11,7 +11,7 @@ if users_s:
     ALLOWED_USERS = [int(x) for x in users_s.split(',')]
 else:
     ALLOWED_USERS = []
-µgoogle_drive_link = os.environ.get("CSV_DATA", "").strip()
+google_drive_link = os.environ.get("CSV_DATA", "").strip()
 
 if google_drive_link:
     # Extract the File ID from the link
