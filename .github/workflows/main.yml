@@ -1,19 +1,13 @@
-name: Run Python Script
+name: Run Telegram Bot Script
 
 on:
-  push:
-    branches:
-      - main  # ✅ Runs when you push to the "main" branch
-  pull_request:
-    branches:
-      - main  # ✅ Runs on pull requests to "main"
-  workflow_dispatch:  # ✅ Allows you to run it manually from GitHub Actions
+  schedule:
+    - cron: "*/30 * * * *"  # Runs every 30 minutes
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   run-script:
-    runs-on: ubuntu-latest
-    env:
-      CSV_URL: ${{ secrets.CSV_DATA }}  # ✅ Pass the secret as an environment variable
+    runs-on: ubuntu-latest  # Best for free-tier minutes
 
     steps:
       - name: Checkout repository
@@ -24,9 +18,10 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install dependencies
+      - name: Install Dependencies
+        run: |
           pip install --upgrade pip
-          pip install python-telegram-bot pandas gdown
+          pip install python-telegram-bot pandas
 
-      - name: Run Python script
-        run: python tb.py
+      - name: Run Script
+        run: python your_script.py
