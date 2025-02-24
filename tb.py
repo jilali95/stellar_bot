@@ -16,17 +16,13 @@ google_drive_link = os.getenv("CSV_DATA", "").strip()
 
 if google_drive_link:
     try:
-        output = "stock.csv"  # Name of the downloaded file
+        # Read the CSV directly from the Google Drive link
+        df = pd.read_csv(google_drive_link)
 
-        # Download the file using gdown with the full link
-        gdown.download(google_drive_link, output, quiet=False)
-
-        # Read the CSV file
-        df = pd.read_csv(output)
         print(df.head())  # Debugging (remove later)
 
     except Exception as e:
-        print(f"⚠️ Error downloading CSV: {e}")
+        print(f"⚠️ Error reading CSV: {e}")
 
 else:
     print("⚠️ Error: CSV_DATA secret not found or empty!")
