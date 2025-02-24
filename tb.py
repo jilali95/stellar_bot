@@ -9,26 +9,39 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 users_s = os.getenv("USERS_S", "").strip()
 ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
 
-# ✅ Get the Google Drive link from GitHub Secrets
-google_drive_link = os.getenv("CSV_DATA", "").strip()
+import os
+import time
+import pandas as pd
+import requests
+import gdown  # Ensure gdown is installed
 
-df = None  # Initialize to avoid errors if CSV fails to load
-last_modification = "Unknown"  # Default in case we can't get the date
+# ✅ Get the CSV URL from environment variables
+google_drive_link = os.getenv("CSV_URL")
 
 if google_drive_link:
     try:
+        # ✅ Extract file ID from Google Drive link
+        file_id = google_drive_link.split("/d/")[1].split("/")[0]
+        download_url = f"https://drive.google.com/uc?id={file_id}"
+
         # ✅ Get last modification date from Google Drive HTTP headers
-        response = requests.head(google_drive_link)
+        response = requests.head(download_url)
         if "Last-Modified" in response.headers:
             last_modification = time.strftime('%d.%m.%y', time.strptime(response.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z"))
+            print(f"✅ Last modified: {last_modification}")
 
-        # ✅ Read CSV directly from the Google Drive link
-        df = pd.read_csv(google_drive_link)
+        # ✅ Download the CSV content using gdown
+        output_path = "temp_stock_data.csv"
+        gdown.download(download_url, output_path, quiet=False)
+
+        # ✅ Load the CSV into a DataFrame
+        df = pd.read_csv(output_path)
+        print("✅ CSV loaded successfully!")
 
     except Exception as e:
         print(f"⚠️ Error reading CSV: {e}")
 else:
-    print("⚠️ Error: CSV_DATA secret not found!")
+    print("⚠️ Error: CSV_URL environment variable is missing!")
 
 # ✅ Handle "/h" command
 async def h(update: Update, context: CallbackContext):
