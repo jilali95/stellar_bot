@@ -2,7 +2,7 @@ name: Run Telegram Bot Script
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Runs every 30 minutes
+    - cron: "*/5 * * * *"  # Runs every 5 minutes
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
@@ -22,8 +22,16 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install python-telegram-bot pandas gdown
-          
+
       - name: Run Script
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}  # ✅ Secure way to use it
-        run: python your_script.py
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          STOCK_CSV: ${{ secrets.STOCK_CSV }}
+        run: python tb.py
+
+      - name: Restart Workflow
+        if: always()  # Always restart, even if the script fails
+        run: |
+          gh workflow run main.yml -R ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
