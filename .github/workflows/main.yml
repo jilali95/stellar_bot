@@ -2,7 +2,7 @@ name: Run Telegram Bot Script
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Runs every 30 minutes
+    - cron: "*/5 * * * *"  # Runs every 30 minutes
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
@@ -28,9 +28,5 @@ jobs:
           CSV_URL: ${{ secrets.CSV_DATA }}  # Mapping CSV_DATA secret to CSV_URL variable
           USERS_S: ${{ secrets.USERS_S }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        run: |
-          echo "Starting script..."
-          echo "CSV_URL=${CSV_URL}"  # Debugging
-          echo "USERS_S=${USERS_S}"  # Debugging
-          echo "TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}"  # Debugging (Only length for security)
+        run: 
           python tb.py
