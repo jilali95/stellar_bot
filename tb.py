@@ -40,7 +40,8 @@ def load_stock_data():
 
 # Async function to handle user messages
 async def handle_text(update: Update, context: CallbackContext):
-
+    user_id = update.message.from_user.id
+    user_name = update.message.from_user.first_name
 
     if user_id in ALLOWED_USERS:
         user_input = update.message.text.strip().lower()
