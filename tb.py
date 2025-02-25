@@ -14,42 +14,44 @@ print(f"USERS_S: {os.getenv('USERS_S')}")
 users_s = os.getenv("USERS_S", "").strip()
 ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
 
-# ✅ Get the CSV URL from environment variables
-google_drive_link = os.getenv("CSV_URL")
+# ✅ Get Google Drive file ID directly from environment variable
+file_id = os.getenv("CSV_URL")  # Contains only the file ID, not a full URL
+
 df = None  # Initialize df to avoid reference errors
 
-if google_drive_link:
+if file_id:
     try:
-        # ✅ Extract file ID from Google Drive link
-        
+        # ✅ Construct direct download URL
         download_url = f"https://drive.google.com/uc?id={file_id}"
 
         # ✅ Get last modification date from Google Drive HTTP headers
-        response = requests.head(download_url)
-        if "Last-Modified" in response.headers:
+        response = requests.head(download_url, allow_redirects=True)
+        if response.status_code == 200 and "Last-Modified" in response.headers:
             last_modification = time.strftime('%d.%m.%y', time.strptime(response.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z"))
             print(f"✅ Last modified: {last_modification}")
+        else:
+            last_modification = "Unknown"
+            print("⚠️ Could not retrieve last modification date.")
 
-        # ✅ Download the CSV content using gdown
+        # ✅ Download the CSV using gdown
         output_path = "temp_stock_data.csv"
         gdown.download(download_url, output_path, quiet=False, use_cookies=False)
 
         # ✅ Load the CSV into a DataFrame
-        df = pd.read_csv(output_path)
+        df = pd.read_csv(output_path, delimiter=';', encoding='ISO-8859-1')
         print("✅ CSV loaded successfully!")
 
         # ✅ Check for required columns
         required_columns = {'ARTICLE', 'DERNIER_PRIX_ACHAT', 'pharmacien', 'QTE'}
         if not required_columns.issubset(df.columns):
-            print("⚠️ Error: Missing expected columns in CSV!")
-            df = None  # Reset df if columns are missing
+            raise ValueError("⚠️ Missing expected columns in CSV!")
 
     except Exception as e:
         print(f"⚠️ Error reading CSV: {e}")
         df = None  # Reset df on error
 
 else:
-    print("⚠️ Error: CSV_URL environment variable is missing!")
+    print("⚠️ Error: CSV_URL environment variable is missing or invalid!")
 
 # ✅ Handle "/h" command
 async def h(update: Update, context: CallbackContext):
