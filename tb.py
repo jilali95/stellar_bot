@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 import gdown
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext,
 import urllib.request
 
 
@@ -14,7 +14,6 @@ ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
 # Function to load stock data
 def load_stock_data():
     file_id = os.getenv('CSV_URL')
-
 
     # Set display options to show all rows and all columns
     pd.set_option('display.max_rows', None)
@@ -37,11 +36,13 @@ def load_stock_data():
     except Exception as e:
         logging.error(f"Error loading stock.csv: {e}")
         return pd.DataFrame(), "N/A"
+# Async function to handle user messages
 
 # Async function to handle user messages
 async def handle_text(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     user_name = update.message.from_user.first_name
+    logging.info(f"User {user_name} ({user_id}) sent a message.")
 
     if user_id in ALLOWED_USERS:
         user_input = update.message.text.strip().lower()
