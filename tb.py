@@ -1,11 +1,9 @@
-import os, io
-import time
-import pandas as pd
-import requests
-import gdown
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext,
+import io
 import urllib.request
+import os , time, logging
+import pandas as pd
+from telegram import Update
+from telegram.ext import Application, MessageHandler, filters, CallbackContext
 
 
 users_s = os.getenv("USERS_S", "").strip()
