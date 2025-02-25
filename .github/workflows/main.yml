@@ -2,12 +2,16 @@ name: Run Telegram Bot Script
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Runs every 30 minutes
+    - cron: "*/45 * * * *"  # Runs every 45 minutes
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
   run-script:
     runs-on: ubuntu-latest  # Best for free-tier minutes
+
+    concurrency:
+      group: telegram-bot-run  # Ensures only one instance runs at a time
+      cancel-in-progress: false  # Prevents new runs from canceling existing ones
 
     steps:
       - name: Checkout repository
@@ -28,5 +32,10 @@ jobs:
           CSV_URL: ${{ secrets.CSV_DATA }}  # Mapping CSV_DATA secret to CSV_URL variable
           USERS_S: ${{ secrets.USERS_S }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        run: 
-          python tb.py
+        run: |
+          if pgrep -f "python tb.py"; then
+            echo "Script is already running. Skipping execution."
+            exit 0
+          else
+            python tb.py
+          fi
