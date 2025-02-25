@@ -1,5 +1,6 @@
 import io
-import urllib3
+import urllib.request
+import os , time, logging
 import os , time, logging
 import pandas as pd
 from telegram import Update
@@ -9,30 +10,31 @@ from telegram.ext import Application, MessageHandler, filters, CallbackContext
 users_s = os.getenv("USERS_S", "").strip()
 ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
 def load_stock_data():
-    
-    file_id = os.getenv("CSV_URL")
-    http = urllib3.PoolManager()
+    file_id = "15vcjA3uNjBuTC24zcI8g6OVfT1JOGRy9"  # Replace with the actual file ID
 
+
+    # Set display options to show all rows and all columns
+    pd.set_option('display.max_rows', None)
+
+    url = f"https://drive.google.com/uc?id={file_id}&export=download"
+
+    # Fetch the CSV data
+    with urllib.request.urlopen(url) as response:
+        data = response.read()
+
+    # Decode the data using ISO-8859-1 encoding
+    text_data = data.decode('ISO-8859-1')
+
+    # Create an in-memory file object
+    csv_file = io.StringIO(text_data)
     try:
-        response = http.request("GET", file_id)
-        if response.status == 200:
-            # Convert the response data to a Pandas DataFrame
-            text_data = response.data.decode('ISO-8859-1')
-            df = pd.read_csv(io.StringIO(text_data))
-            last_modified = response.headers.get('Last-Modified', "N/A")
-            return df, last_modified
-        else:
-            logger.error(f"Error: HTTP {response.status}")
-    except urllib3.exceptions.HTTPError as e:
-        logger.error(f"HTTP Error: {e}")
-    except urllib3.exceptions.RequestError as e:
-        logger.error(f"Request Error: {e}")
+        df = pd.read_csv(csv_file, delimiter=';', encoding='ISO-8859-1')
+        last_modification = time.strftime('%d.%m.%y', time.localtime(os.path.getmtime('stock.csv')))
+        return df, last_modification
+    except Exception as e:
+        logging.error(f"Error loading stock.csv: {e}")
+        return pd.DataFrame(), "N/A" 
 
-    # Return an empty DataFrame and "N/A" if there's an error
-    return pd.DataFrame(), "N/A"
-
-
-# Async function to handle user messages
 async def handle_text(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     user_name = update.message.from_user.first_name
@@ -61,12 +63,12 @@ async def handle_text(update: Update, context: CallbackContext):
 
             message_text = "\n________________________________\n".join(results)
             await update.message.reply_text(message_text)
+            await update.message.reply_text(f"\nNombre d'articles: {len(filtered_df)}\nDernière mise à jour: {last_modification}")
         else:
             await update.message.reply_text("Aucun article trouvé. Veuillez affiner votre recherche.")
 
     else:
         await update.message.reply_text("Vous n'êtes pas autorisé à utiliser ce bot.")
-
 
 # ✅ Main function to start the bot
 def main():
