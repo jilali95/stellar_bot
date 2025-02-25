@@ -25,7 +25,8 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install python-telegram-bot pandas requests logging io os
+          pip install pandas requests python-telegram-bot gdown
+
 
       - name: Run Script
         env:
