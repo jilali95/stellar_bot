@@ -9,12 +9,12 @@ from telegram.ext import Application, MessageHandler, filters, CallbackContext
 users_s = os.getenv("USERS_S", "").strip()
 ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
 def load_stock_data():
-
+    
     file_id = os.getenv("CSV_URL")
     http = urllib3.PoolManager()
 
     try:
-        response = http.request("GET", url)
+        response = http.request("GET", file_id)
         if response.status == 200:
             # Convert the response data to a Pandas DataFrame
             text_data = response.data.decode('ISO-8859-1')
