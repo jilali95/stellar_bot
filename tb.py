@@ -12,31 +12,26 @@ ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
 def load_stock_data():
 
     file_id = os.getenv("CSV_URL")
-    # Set display options to show all rows and all columns
-    pd.set_option('display.max_rows', None)
+    http = urllib3.PoolManager()
 
-    url = f"https://drive.google.com/uc?id={file_id}&export=download"
-
-    # Fetch the CSV data
     try:
-        with urllib.request.urlopen(url) as response:
-            data = response.read()
-        return data
-    except urllib.error.HTTPError as e:
-        print(f"HTTP Error: {e.code} - {e.reason}")
-    except urllib.error.URLError as e:
-        print(f"URL Error: {e.reason}")
-    # Decode the data using ISO-8859-1 encoding
-    text_data = data.decode('ISO-8859-1')
+        response = http.request("GET", url)
+        if response.status == 200:
+            # Convert the response data to a Pandas DataFrame
+            text_data = response.data.decode('ISO-8859-1')
+            df = pd.read_csv(io.StringIO(text_data))
+            last_modified = response.headers.get('Last-Modified', "N/A")
+            return df, last_modified
+        else:
+            logger.error(f"Error: HTTP {response.status}")
+    except urllib3.exceptions.HTTPError as e:
+        logger.error(f"HTTP Error: {e}")
+    except urllib3.exceptions.RequestError as e:
+        logger.error(f"Request Error: {e}")
 
-    # Create an in-memory file object
-    csv_file = io.StringIO(text_data)
-    try:
-        df = pd.read_csv(csv_file, delimiter=';', encoding='ISO-8859-1')
-        return df, 
-    except Exception as e:
-        logging.error(f"Error loading stock.csv: {e}")
-        return pd.DataFrame(), "N/A"
+    # Return an empty DataFrame and "N/A" if there's an error
+    return pd.DataFrame(), "N/A"
+
 
 # Async function to handle user messages
 async def handle_text(update: Update, context: CallbackContext):
