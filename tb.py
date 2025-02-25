@@ -1,6 +1,5 @@
 import io
-import urllib3.request
-import urllib3.error
+import urllib3
 import os , time, logging
 import pandas as pd
 from telegram import Update
