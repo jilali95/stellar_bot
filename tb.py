@@ -21,7 +21,7 @@ df = None  # Initialize df to avoid reference errors
 if google_drive_link:
     try:
         # ✅ Extract file ID from Google Drive link
-        file_id = google_drive_link.split("/d/")[1].split("/")[0]
+        
         download_url = f"https://drive.google.com/uc?id={file_id}"
 
         # ✅ Get last modification date from Google Drive HTTP headers
