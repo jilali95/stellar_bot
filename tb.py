@@ -101,6 +101,7 @@ async def handle_text(update: Update, context: CallbackContext):
 
 # ✅ Main function to start the bot
 def main():
+    print(os.getenv("TELEGRAM_BOT_TOKEN"))
     application = Application.builder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(CommandHandler('h', h))
