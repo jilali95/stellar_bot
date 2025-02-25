@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Script
         env:
-          CSV_URL: ${{ secrets.CSV_DATA }}  # Mapping CSV_DATA secret to CSV_URL variable
+          CSV_URL: ${{ secrets.CSV_URL }}  # Mapping CSV_DATA secret to CSV_URL variable
           USERS_S: ${{ secrets.USERS_S }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
