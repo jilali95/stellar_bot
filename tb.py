@@ -11,7 +11,7 @@ users_s = os.getenv("USERS_S", "").strip()
 ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
 def load_stock_data():
 
-    file_id = os.getenv("USERS_S", "").strip()
+    file_id = os.getenv("CSV_URL")
     # Set display options to show all rows and all columns
     pd.set_option('display.max_rows', None)
 
