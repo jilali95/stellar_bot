@@ -1,5 +1,6 @@
 import io
 import urllib.request
+import urllib.error
 import os , time, logging
 import pandas as pd
 from telegram import Update
@@ -17,9 +18,14 @@ def load_stock_data():
     url = f"https://drive.google.com/uc?id={file_id}&export=download"
 
     # Fetch the CSV data
-    with urllib.request.urlopen(url) as response:
-        data = response.read()
-
+    try:
+        with urllib.request.urlopen(url) as response:
+            data = response.read()
+        return data
+    except urllib.error.HTTPError as e:
+        print(f"HTTP Error: {e.code} - {e.reason}")
+    except urllib.error.URLError as e:
+        print(f"URL Error: {e.reason}")
     # Decode the data using ISO-8859-1 encoding
     text_data = data.decode('ISO-8859-1')
 
