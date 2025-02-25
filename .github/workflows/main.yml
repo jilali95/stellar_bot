@@ -28,6 +28,7 @@ jobs:
           pip install pandas requests python-telegram-bot gdown urllib3
 
 
+
       - name: Run Script
         env:
           CSV_URL: ${{ secrets.CSV_DATA }}  # Mapping CSV_DATA secret to CSV_URL variable
