@@ -10,7 +10,7 @@ from telegram.ext import Application, MessageHandler, filters, CallbackContext
 users_s = os.getenv("USERS_S", "").strip()
 ALLOWED_USERS = [int(x) for x in users_s.split(',')] if users_s else []
 def load_stock_data():
-    file_id = "15vcjA3uNjBuTC24zcI8g6OVfT1JOGRy9"  # Replace with the actual file ID
+    file_id = osgetenv("CSV_URL")
 
 
     # Set display options to show all rows and all columns
